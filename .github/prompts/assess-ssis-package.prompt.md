@@ -1,6 +1,6 @@
 ---
-agent: "agent"
-tools: ["search/codebase", "edit/editFiles", "read/problems"]
+agent: "SQL Assessment"
+tools: ["edit/editFiles", "read/problems", "read/readFile"]
 description: "Assess an SSIS package ETL script for performance anti-patterns, row-by-row processing, lookup cache issues, missing error handling, and load strategy problems. Produces a diagnostic assessment report — does NOT produce optimized code."
 ---
 
@@ -14,15 +14,17 @@ ${selection}
 
 ## Output Destination
 
-Save the assessment report as a **Markdown file** in the `samples/queries/assessment/` folder.
+Save the assessment report as a **Markdown file** in the `samples/ssis/assessment/` folder.
 
 ### File Naming Convention
 
 - Derive the output filename from the source SSIS script filename: strip `.dtsx.sql` and append `-assessment.md`.
-- Example: `ETL_CustomerDataLoad.dtsx.sql` → `samples/queries/assessment/ETL_CustomerDataLoad-assessment.md`
+- Example: `ETL_CustomerDataLoad.dtsx.sql` → `samples/ssis/assessment/ETL_CustomerDataLoad-assessment.md`
 - If the source filename cannot be determined, use `ssis-assessment-YYYY-MM-DD.md` with the current date.
 
 ## Assessment Areas
+
+Reference the `ssis-best-practices` skill for the complete ETL anti-pattern catalog, cache strategy decisions, and configuration recommendations.
 
 ### 1. Data Flow Efficiency
 Check for:
@@ -62,7 +64,7 @@ Check for:
 
 ## Output Format
 
-Write the assessment report as a Markdown file. **Save this file to `samples/queries/assessment/` using the editFiles tool. Do NOT just display the output inline — the file must be created on disk.**
+Write the assessment report as a Markdown file. **Save this file to `samples/ssis/assessment/` using the editFiles tool. Do NOT just display the output inline — the file must be created on disk.**
 
 **Important:** This is an assessment report only. Do NOT include rewritten or optimized ETL code. Describe the issues and recommend fixes, but leave implementation to the `@ssis-optimizer` agent.
 
@@ -140,7 +142,7 @@ Monitor these metrics before and after optimization:
 
 ## Next Steps
 
-1. Run `@ssis-optimizer` agent to implement the fixes identified in this assessment.
+1. Run `@ssis-optimizer` agent to implement the fixes identified in this assessment. The optimized code will be saved to `samples/ssis/after/`.
 2. Apply recommended package property settings.
 3. Test incremental load patterns in a non-production environment.
 4. Verify error handling with intentional bad data rows.

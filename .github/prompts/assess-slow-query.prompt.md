@@ -1,6 +1,6 @@
 ---
-agent: "agent"
-tools: ["search/codebase", "edit/editFiles", "read/problems"]
+agent: "SQL Assessment"
+tools: ["edit/editFiles", "read/problems", "read/readFile"]
 description: "Analyze a slow SQL query to identify performance bottlenecks, non-SARGable predicates, and missing indexes. Produces a diagnostic assessment report — does NOT produce optimized code. Saves the report to the assessment folder."
 ---
 
@@ -28,6 +28,8 @@ Save the assessment report as a **Markdown file** in the `samples/queries/assess
 `samples/queries/assessment/<derived-filename>-assessment.md`
 
 ## Analysis Checklist
+
+Reference the `sql-anti-patterns` skill for the complete anti-pattern catalog with severity definitions and before/after examples. Reference the `sql-indexing-patterns` skill for index design patterns and column ordering rules.
 
 Evaluate the query against each of these categories:
 
@@ -129,7 +131,7 @@ SET STATISTICS TIME OFF;
 
 ## Next Steps
 
-1. Run `@sql-performance-tuner` agent to implement the fixes and optimized query based on this assessment.
+1. Run `@sql-performance-tuner` agent to implement the fixes and optimized query based on this assessment. The optimized code will be saved to `samples/queries/after/`.
 2. Deploy recommended indexes in a non-production environment first.
 3. Compare `SET STATISTICS IO/TIME` output before and after optimization.
 4. Review execution plan with `SET SHOWPLAN_XML ON` to verify index seeks replace scans.

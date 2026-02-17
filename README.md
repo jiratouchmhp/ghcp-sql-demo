@@ -28,7 +28,7 @@ This repository provides a **hands-on demo environment** for demonstrating how G
 | 1 | Stored Procedure — Cursor Elimination | `/assess-stored-procedure` | `@sql-performance-tuner` | ~10 min |
 | 2 | Stored Procedure — Security + Performance | `/assess-stored-procedure` | `@sql-code-implementation` | ~10 min |
 | 3 | View Performance Analysis | `/assess-view` + `/generate-index-recommendations` | `@sql-performance-tuner` | ~8 min |
-| 4 | Slow Query Deep-Dive | `/analyze-slow-query` + `/review-execution-plan` | `@sql-performance-tuner` | ~10 min |
+| 4 | Slow Query Deep-Dive | `/assess-slow-query` + `/review-execution-plan` | `@sql-performance-tuner` | ~10 min |
 | 5 | SSIS/ETL Optimization | `/assess-ssis-package` | `@ssis-optimizer` | ~12 min |
 
 > 📖 See [docs/DEMO-GUIDE.md](docs/DEMO-GUIDE.md) for the full step-by-step runbook.
@@ -36,10 +36,11 @@ This repository provides a **hands-on demo environment** for demonstrating how G
 ## 📁 Project Structure
 
 ```
-ghcp-demo-sql-tuning/
+ghcp-sql-demo/
 ├── .github/
 │   ├── copilot-instructions.md              # Global Copilot project instructions
 │   ├── agents/
+│   │   ├── sql-assessment.agent.md           # SQL assessment report agent
 │   │   ├── sql-performance-tuner.agent.md   # SQL Server perf tuning agent
 │   │   ├── ssis-optimizer.agent.md          # SSIS package optimization agent
 │   │   └── sql-code-implementation.agent.md # SQL code implementation agent
@@ -49,7 +50,7 @@ ghcp-demo-sql-tuning/
 │   │   ├── sql-indexing.instructions.md
 │   │   └── ssis-packages.instructions.md
 │   ├── prompts/
-│   │   ├── analyze-slow-query.prompt.md
+│   │   ├── assess-slow-query.prompt.md
 │   │   ├── assess-stored-procedure.prompt.md
 │   │   ├── assess-view.prompt.md
 │   │   ├── assess-ssis-package.prompt.md
@@ -57,14 +58,11 @@ ghcp-demo-sql-tuning/
 │   │   └── generate-index-recommendations.prompt.md
 │   └── skills/
 │       ├── sql-anti-patterns/
-│       │   ├── SKILL.md                     # Anti-pattern detection skill
-│       │   └── anti-patterns.md             # Full anti-pattern catalog
+│       │   └── SKILL.md                     # Anti-pattern detection skill (includes full catalog)
 │       ├── sql-indexing-patterns/
-│       │   ├── SKILL.md                     # Index design skill
-│       │   └── indexing-patterns.md         # Index patterns reference
+│       │   └── SKILL.md                     # Index design skill (includes full patterns)
 │       └── ssis-best-practices/
-│           ├── SKILL.md                     # SSIS/ETL optimization skill
-│           └── ssis-best-practices.md       # ETL best practices reference
+│           └── SKILL.md                     # SSIS/ETL optimization skill (includes full reference)
 ├── samples/
 │   ├── database-setup/
 │   │   ├── 01-create-database.sql           # Schema creation
@@ -75,13 +73,15 @@ ghcp-demo-sql-tuning/
 │   │   │   ├── usp_GetCustomerOrders.sql
 │   │   │   ├── usp_ProcessBatchOrders.sql
 │   │   │   └── usp_SearchProducts.sql
-│   │   └── after/                           # ✅ Optimized (demo output)
+│   │   ├── after/                           # ✅ Optimized (demo output)
+│   │   └── assessment/                      # 📊 Assessment reports
 │   ├── views/
 │   │   ├── before/                          # ❌ Suboptimal (demo input)
 │   │   │   ├── vw_CustomerOrderSummary.sql
 │   │   │   ├── vw_InventoryStatus.sql
 │   │   │   └── vw_SalesDashboard.sql
-│   │   └── after/                           # ✅ Optimized (demo output)
+│   │   ├── after/                           # ✅ Optimized (demo output)
+│   │   └── assessment/                      # 📊 Assessment reports
 │   ├── queries/
 │   │   ├── before/                          # ❌ Suboptimal (demo input)
 │   │   │   ├── slow-query-01-reporting.sql
@@ -94,7 +94,8 @@ ghcp-demo-sql-tuning/
 │       │   ├── ETL_CustomerDataLoad.dtsx.sql
 │       │   ├── ETL_DataWarehouseRefresh.dtsx.sql
 │       │   └── ETL_SalesAggregation.dtsx.sql
-│       └── after/                           # ✅ Optimized (demo output)
+│       ├── after/                           # ✅ Optimized (demo output)
+│       └── assessment/                      # 📊 Assessment reports
 ├── docs/
 │   ├── DEMO-GUIDE.md                        # Complete demo runbook with scenario details
 │   └── ARCHITECTURE.md                      # Database design reference
@@ -116,8 +117,8 @@ ghcp-demo-sql-tuning/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-org/ghcp-demo-sql-tuning.git
-cd ghcp-demo-sql-tuning
+git clone https://github.com/jiratouchmhp/ghcp-sql-demo.git
+cd ghcp-sql-demo
 
 # 2. Open in VS Code
 code .
@@ -148,7 +149,7 @@ This project includes **3 specialized skills** that Copilot loads on-demand base
 | **sql-indexing-patterns** | Index recommendations, covering indexes, composite keys, missing index DMVs | `.github/skills/sql-indexing-patterns/` |
 | **ssis-best-practices** | ETL optimization, Lookup cache modes, bulk load, incremental load, Data Flow tuning | `.github/skills/ssis-best-practices/` |
 
-Skills use **progressive disclosure** — Copilot always knows which skills exist (via `name` + `description`), but only loads the full content when your prompt matches. If your query touches multiple topics, Copilot loads multiple skills simultaneously.
+Skills use **progressive disclosure** — Copilot always knows which skills exist (via `name` + `description`), but only loads the full content when your prompt matches. Each `SKILL.md` is self-contained with severity definitions, before/after code examples, and detection rules — no secondary files to load. If your query touches multiple topics, Copilot loads multiple skills simultaneously.
 
 ## 📚 Additional Resources
 

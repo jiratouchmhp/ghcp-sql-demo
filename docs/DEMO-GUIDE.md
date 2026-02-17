@@ -43,7 +43,7 @@ Each scenario follows a consistent **Assess → Implement** workflow:
 | 1 | Stored Procedure — Cursor Elimination | 10 min | `usp_GetCustomerOrders.sql` | `/assess-stored-procedure` | `@sql-performance-tuner` |
 | 2 | Stored Procedure — Security + Performance | 10 min | `usp_GenerateSalesReport.sql` | `/assess-stored-procedure` | `@sql-code-implementation` |
 | 3 | View Performance Analysis | 8 min | `vw_CustomerOrderSummary.sql` | `/assess-view` | `@sql-performance-tuner` |
-| 4 | Slow Query Deep-Dive | 8 min | `slow-query-02-aggregation.sql` | `/analyze-slow-query` + `/review-execution-plan` | `@sql-performance-tuner` |
+| 4 | Slow Query Deep-Dive | 8 min | `slow-query-02-aggregation.sql` | `/assess-slow-query` + `/review-execution-plan` | `@sql-performance-tuner` |
 | 5 | SSIS/ETL Optimization | 12 min | `ETL_DataWarehouseRefresh.dtsx.sql` | `/assess-ssis-package` | `@ssis-optimizer` |
 
 **Total estimated time: ~50 minutes** (adjust by skipping scenarios)
@@ -222,7 +222,7 @@ indexed view candidates.
 
 Run both assessment prompts:
 ```
-/analyze-slow-query
+/assess-slow-query
 ```
 ```
 /review-execution-plan

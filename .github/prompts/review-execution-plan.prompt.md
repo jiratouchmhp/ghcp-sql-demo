@@ -1,6 +1,6 @@
 ---
-agent: "agent"
-tools: ["search/codebase", "edit/editFiles", "read/problems"]
+agent: "SQL Assessment"
+tools: ["edit/editFiles", "read/problems", "read/readFile"]
 description: "Analyze SQL Server execution plan output (XML or text) to identify expensive operators, missing indexes, and implicit conversions. Produces a diagnostic assessment report — does NOT produce optimized code."
 ---
 

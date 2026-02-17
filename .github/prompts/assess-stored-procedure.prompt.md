@@ -1,6 +1,6 @@
 ---
-agent: "agent"
-tools: ["search/codebase", "edit/editFiles", "read/problems"]
+agent: "SQL Assessment"
+tools: ["edit/editFiles", "read/problems", "read/readFile"]
 description: "Assess a SQL Server stored procedure for performance anti-patterns, missing error handling, naming convention violations, and security issues. Produces a diagnostic assessment report — does NOT produce optimized code."
 ---
 
@@ -14,15 +14,17 @@ ${selection}
 
 ## Output Destination
 
-Save the assessment report as a **Markdown file** in the `samples/queries/assessment/` folder.
+Save the assessment report as a **Markdown file** in the `samples/stored-procedures/assessment/` folder.
 
 ### File Naming Convention
 
 - Derive the output filename from the source procedure filename: strip `.sql` and append `-assessment.md`.
-- Example: `usp_GetCustomerOrders.sql` → `samples/queries/assessment/usp_GetCustomerOrders-assessment.md`
+- Example: `usp_GetCustomerOrders.sql` → `samples/stored-procedures/assessment/usp_GetCustomerOrders-assessment.md`
 - If the source filename cannot be determined, derive it from the procedure name (e.g., `usp_ProcedureName-assessment.md`).
 
 ## Assessment Areas
+
+Reference the `sql-anti-patterns` skill for the complete anti-pattern catalog with severity definitions and before/after examples.
 
 ### 1. Performance Anti-Patterns
 Check for:
@@ -59,7 +61,7 @@ Check for:
 
 ## Output Format
 
-Write the assessment report as a Markdown file. **Save this file to `samples/queries/assessment/` using the editFiles tool. Do NOT just display the output inline — the file must be created on disk.**
+Write the assessment report as a Markdown file. **Save this file to `samples/stored-procedures/assessment/` using the editFiles tool. Do NOT just display the output inline — the file must be created on disk.**
 
 **Important:** This is an assessment report only. Do NOT include rewritten or optimized code. Describe the issues and recommend fixes, but leave implementation to the `@sql-performance-tuner` agent.
 
@@ -126,7 +128,7 @@ SET STATISTICS TIME OFF;
 
 ## Next Steps
 
-1. Run `@sql-performance-tuner` agent to implement the fixes identified in this assessment.
+1. Run `@sql-performance-tuner` agent to implement the fixes identified in this assessment. The optimized code will be saved to `samples/stored-procedures/after/`.
 2. Deploy recommended indexes in a non-production environment first.
 3. Compare `SET STATISTICS IO/TIME` output before and after optimization.
 4. Review execution plan with `SET SHOWPLAN_XML ON` to verify index seeks replace scans.

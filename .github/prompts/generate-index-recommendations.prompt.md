@@ -1,6 +1,6 @@
 ---
-agent: "agent"
-tools: ["search/codebase", "edit/editFiles", "read/problems"]
+agent: "SQL Assessment"
+tools: ["edit/editFiles", "read/problems", "read/readFile"]
 description: "Analyze query patterns and table schemas to assess index needs, identifying missing indexes, redundant indexes, and covering index opportunities. Produces a diagnostic assessment report — does NOT create index scripts directly."
 ---
 
@@ -24,6 +24,8 @@ Save the index assessment as a **Markdown file** in the `samples/queries/assessm
 - If the source filename cannot be determined, use `index-assessment-YYYY-MM-DD.md` with the current date.
 
 ## Analysis Process
+
+Reference the `sql-indexing-patterns` skill for index design patterns, column ordering rules, naming conventions, and redundancy detection.
 
 ### Step 1: Extract Query Patterns
 From the provided SQL code, identify:
