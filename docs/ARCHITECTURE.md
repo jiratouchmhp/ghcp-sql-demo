@@ -136,3 +136,93 @@ The SSIS demo creates an additional star schema in the `dw` schema:
 |-------|--------|---------|
 | CustomerImport | staging | Landing table for customer data ETL |
 | DailySalesSummary | dbo | Aggregated daily sales from ETL |
+
+## Subagent Orchestration
+
+The project uses the **coordinator-worker** subagent pattern to automate the Assess → Implement workflow. A coordinator agent delegates phases of the optimization pipeline to specialist agents running as isolated subagents.
+
+### Agent Hierarchy
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    User Prompt                               │
+│              /full-optimization                              │
+└──────────────────────┬───────────────────────────────────────┘
+                       │
+                       ▼
+         ┌─────────────────────────────┐
+         │    @SQL Full Optimizer      │   ← Coordinator Agent
+         │    (orchestrates pipeline)  │
+         │                            │
+         │  1. Classify artifact       │
+         │  2. Delegate assessment     │
+         │  3. Delegate implementation │
+         │  4. Synthesize results      │
+         └──────┬──────────────┬───────┘
+                │              │
+           Subagent 1     Subagent 2
+           (sequential)   (sequential)
+                │              │
+                ▼              ▼
+     ┌──────────────────┐  ┌──────────────────────┐
+     │ @SQL Assessment  │  │ Implementation Agent │
+     │   (subagent)     │  │    (subagent)        │
+     ├──────────────────┤  ├──────────────────────┤
+     │ Anti-pattern     │  │ One of:              │
+     │ detection,       │  │ • @SQL Perf Tuner    │
+     │ SARGability,     │  │ • @SQL Code Impl     │
+     │ index analysis   │  │ • @SSIS Optimizer    │
+     │                  │  │                      │
+     │ Output:          │  │ Output:              │
+     │ assessment/      │  │ after/               │
+     │ *.assessment.md  │  │ *.sql                │
+     └──────────────────┘  └──────────────────────┘
+```
+
+### Parallel Subagent Pattern
+
+The `/multi-perspective-review` prompt demonstrates **parallel** subagent execution:
+
+```
+┌──────────────────────────────────────────┐
+│         /multi-perspective-review        │
+└──────────────────┬───────────────────────┘
+                   │
+          ┌────────┴────────┐
+          │   Parallel      │
+          ▼                 ▼
+┌──────────────────┐ ┌──────────────────┐
+│ Performance      │ │ Security & Code  │
+│ Review Subagent  │ │ Quality Subagent │
+├──────────────────┤ ├──────────────────┤
+│ SARGability      │ │ SQL injection    │
+│ Cursors/RBAR     │ │ Permissions      │
+│ Index gaps       │ │ Error handling   │
+│ Join strategy    │ │ Naming/format    │
+└────────┬─────────┘ └────────┬─────────┘
+         │                    │
+         └────────┬───────────┘
+                  ▼
+         ┌────────────────┐
+         │  Synthesized   │
+         │  Prioritized   │
+         │  Report        │
+         └────────────────┘
+```
+
+### Agent Routing Table
+
+| Artifact | Assessment | Implementation | Routing Criteria |
+|----------|-----------|----------------|-----------------|
+| Stored Procedure (perf) | `@SQL Assessment` | `@SQL Performance Tuner` | Cursors, non-SARGable, scalar subqueries |
+| Stored Procedure (security) | `@SQL Assessment` | `@SQL Code Implementation` | SQL injection, dynamic SQL, credentials |
+| View | `@SQL Assessment` | `@SQL Performance Tuner` | Subqueries, missing SCHEMABINDING |
+| Query | `@SQL Assessment` | `@SQL Performance Tuner` | Correlated subqueries, table scans |
+| SSIS Package | `@SQL Assessment` | `@SSIS Optimizer` | Row-by-row ETL, cache misuse |
+
+### Key Design Decisions
+
+- **Sequential subagents for the pipeline**: Assessment must complete before implementation starts, because the implementation agent needs the diagnostic findings to produce targeted fixes.
+- **Parallel subagents for multi-perspective review**: Performance and security reviews are independent — neither should bias the other, and running them simultaneously reduces total execution time.
+- **Context isolation**: Each subagent gets a clean context window. The coordinator only receives the final summary, preventing context bloat from intermediate analysis.
+- **Existing agents unchanged**: All four specialist agents work both standalone (user-invoked) and as subagents (coordinator-invoked) with no modifications.

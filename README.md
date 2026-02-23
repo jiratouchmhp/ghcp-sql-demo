@@ -20,6 +20,7 @@ This repository provides a **hands-on demo environment** for demonstrating how G
 | **Query Optimization** | Execution plan analysis, index recommendations, SARGability fixes |
 | **SSIS Packages** | ETL data flow tuning, lookup cache strategy, bulk load patterns |
 | **Code Review** | Security audit (SQL injection), naming conventions, maintainability |
+| **Subagent Orchestration** | Coordinator-worker pattern, parallel multi-perspective review, automated Assess → Implement pipeline |
 
 ## 🎯 Demo Scenarios
 
@@ -30,8 +31,16 @@ This repository provides a **hands-on demo environment** for demonstrating how G
 | 3 | View Performance Analysis | `/assess-view` + `/generate-index-recommendations` | `@sql-performance-tuner` | ~8 min |
 | 4 | Slow Query Deep-Dive | `/assess-slow-query` + `/review-execution-plan` | `@sql-performance-tuner` | ~10 min |
 | 5 | SSIS/ETL Optimization | `/assess-ssis-package` | `@ssis-optimizer` | ~12 min |
+| 6 | Subagent Full Optimization Pipeline | `/full-optimization` | `@sql-full-optimizer` (coordinator) | ~10 min |
 
 > 📖 See [docs/DEMO-GUIDE.md](docs/DEMO-GUIDE.md) for the full step-by-step runbook.
+
+### Subagent Bonus Demos
+
+| Prompt | Pattern | What It Shows |
+|--------|---------|---------------|
+| `/full-optimization` | Coordinator-Worker (sequential) | Single invocation runs `@SQL Assessment` → `@SQL Performance Tuner` as chained subagents |
+| `/multi-perspective-review` | Parallel Subagents | Performance + Security reviews run simultaneously, then merge into a prioritized report |
 
 ## 📁 Project Structure
 
@@ -43,7 +52,8 @@ ghcp-sql-demo/
 │   │   ├── sql-assessment.agent.md           # SQL assessment report agent
 │   │   ├── sql-performance-tuner.agent.md   # SQL Server perf tuning agent
 │   │   ├── ssis-optimizer.agent.md          # SSIS package optimization agent
-│   │   └── sql-code-implementation.agent.md # SQL code implementation agent
+│   │   ├── sql-code-implementation.agent.md # SQL code implementation agent
+│   │   └── sql-full-optimizer.agent.md      # Coordinator agent (subagent orchestration)
 │   ├── instructions/
 │   │   ├── sql-stored-procedures.instructions.md
 │   │   ├── sql-views.instructions.md
@@ -55,7 +65,9 @@ ghcp-sql-demo/
 │   │   ├── assess-view.prompt.md
 │   │   ├── assess-ssis-package.prompt.md
 │   │   ├── review-execution-plan.prompt.md
-│   │   └── generate-index-recommendations.prompt.md
+│   │   ├── generate-index-recommendations.prompt.md
+│   │   ├── full-optimization.prompt.md          # Subagent: full Assess → Implement pipeline
+│   │   └── multi-perspective-review.prompt.md   # Subagent: parallel multi-perspective review
 │   └── skills/
 │       ├── sql-anti-patterns/
 │       │   └── SKILL.md                     # Anti-pattern detection skill (includes full catalog)
@@ -150,6 +162,26 @@ This project includes **3 specialized skills** that Copilot loads on-demand base
 | **ssis-best-practices** | ETL optimization, Lookup cache modes, bulk load, incremental load, Data Flow tuning | `.github/skills/ssis-best-practices/` |
 
 Skills use **progressive disclosure** — Copilot always knows which skills exist (via `name` + `description`), but only loads the full content when your prompt matches. Each `SKILL.md` is self-contained with severity definitions, before/after code examples, and detection rules — no secondary files to load. If your query touches multiple topics, Copilot loads multiple skills simultaneously.
+
+### Subagent Orchestration
+
+This project demonstrates the **coordinator-worker subagent pattern** — a coordinator agent delegates phases of the optimization pipeline to specialist agents running as isolated subagents:
+
+| Component | Role | Subagent Pattern |
+|-----------|------|------------------|
+| `@sql-full-optimizer` | **Coordinator** — orchestrates the pipeline, delegates to workers | Spawns sequential subagents |
+| `@sql-assessment` | **Worker** — produces diagnostic assessment reports | Runs as Subagent 1 |
+| `@sql-performance-tuner` | **Worker** — produces optimized SQL code | Runs as Subagent 2 |
+| `@sql-code-implementation` | **Worker** — fixes security + quality issues | Runs as Subagent 2 (alt) |
+| `@ssis-optimizer` | **Worker** — optimizes ETL packages | Runs as Subagent 2 (alt) |
+
+**Key benefits:**
+- **One prompt, full lifecycle** — `/full-optimization` runs assessment AND implementation automatically
+- **Context isolation** — each subagent gets a clean context window, preventing bloat
+- **Parallel review** — `/multi-perspective-review` runs performance and security reviews simultaneously
+- **No agent changes needed** — existing specialist agents work both standalone and as subagents
+
+> 📖 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#subagent-orchestration) for the full orchestration diagrams.
 
 ## 📚 Additional Resources
 
